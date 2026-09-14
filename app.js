@@ -3,7 +3,7 @@
 const APP_NAME = 'training operacao normal pratica CIC';
 const STORAGE_KEY = 'training-operacao-normal-pratica-cic-v3';
 const LEGACY_STORAGE_KEYS = ['training-operacao-normal-pratica-cic-v2'];
-const APP_VERSION = 'V3.1.1 · Sala CIC + instalação PWA';
+const APP_VERSION = 'V3.1.2 · correção PWA/ícones';
 
 const DIM_LABELS = { safety:'Segurança', stability:'Estabilidade', procedure:'Procedimento', coordination:'Coordenação' };
 
@@ -729,7 +729,7 @@ function coachingFor(dim){return ({
   coordination:'Reforce o handshake CIC-campo: solicitar, confirmar, observar a resposta e só então liberar a etapa seguinte.'
 })[dim]||'';}
 
-function topbar(){ return `<div class="topbar"><div class="brand"><img src="icons/icon-192.png" alt=""><div><h1>${APP_NAME}</h1><small>U-39 · Training Scenario Engine · foco operador CIC · ${APP_VERSION}</small></div></div><div class="actions"><button id="installBtn" class="btn primary">Instalar App</button><button id="updateBtn" class="btn ghost">Atualizar app</button></div></div>`; }
+function topbar(){ return `<div class="topbar"><div class="brand"><img src="icon-192.png" alt=""><div><h1>${APP_NAME}</h1><small>U-39 · Training Scenario Engine · foco operador CIC · ${APP_VERSION}</small></div></div><div class="actions"><button id="installBtn" class="btn primary">Instalar App</button><button id="updateBtn" class="btn ghost">Atualizar app</button></div></div>`; }
 function footer(){return `<div class="footer-note">Treinamento complementar baseado nos padrões fornecidos. Para execução real, prevalecem o procedimento vigente, a condição da unidade e as autorizações operacionais aplicáveis.</div>`}
 
 function home(){
