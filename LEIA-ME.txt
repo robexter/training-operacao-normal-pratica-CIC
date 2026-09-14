@@ -1,15 +1,16 @@
-HOTFIX V3.1.4 — LINK TRAVANDO NO CELULAR
+RECUPERAÇÃO DO LINK NO CELULAR
 
-Substitua SOMENTE estes dois arquivos na raiz do GitHub:
-1. pwa.js
-2. sw.js
+1. Substitua pwa.js na raiz do GitHub.
+2. Adicione reset.html na raiz do GitHub.
+3. No Chrome do celular abra:
+   https://robexter.github.io/training-operacao-normal-pratica-CIC/reset.html
+4. Toque em "Recuperar e abrir treinamento".
 
-Causa corrigida:
-O pwa.js V3.1.3 observava todas as alterações do DOM e, dentro do próprio observador,
-alterava novamente o botão "Instalar App". Em celular isso podia gerar um ciclo contínuo
-de alterações e travar a abertura da página.
+O reset remove apenas Service Workers/caches cujo escopo/nome pertence a:
+training-operacao-normal-pratica-CIC
 
-Depois do upload, use o endereço normal:
-https://robexter.github.io/training-operacao-normal-pratica-CIC/
+Ele NÃO apaga localStorage/progresso e NÃO interfere nos outros treinamentos.
 
-Não use o endereço com ?app=... para o primeiro teste.
+Nesta versão o Service Worker deixa de ser registrado automaticamente na abertura.
+Primeiro garantimos que a página abra normalmente. O SW só será registrado quando
+o usuário tocar em "Instalar App".

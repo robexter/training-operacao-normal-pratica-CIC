@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>Recuperar Operação Normal CIC</title>
+<style>
+body{margin:0;background:#07111f;color:#fff;font-family:Arial,sans-serif;min-height:100vh;display:grid;place-items:center}
+main{width:min(92%,520px);background:#0d1d2d;border:1px solid #28445e;border-radius:18px;padding:24px;box-sizing:border-box}
+h1{font-size:22px;margin:0 0 12px}.status{padding:14px;border-radius:12px;background:#12283c;margin:16px 0;line-height:1.5}
+button{width:100%;padding:15px;border:0;border-radius:12px;font-weight:700;font-size:16px;background:#f3b51b;color:#07111f}
+small{display:block;margin-top:12px;opacity:.78;line-height:1.45}
+</style>
+</head>
+<body>
+<main>
+<h1>Recuperação do treinamento</h1>
+<p>Esta página remove apenas o Service Worker e os caches do treinamento <b>Operação Normal CIC</b>. O progresso salvo em localStorage não é apagado.</p>
+<div id="status" class="status">Pronto para recuperar.</div>
+<button id="go">Recuperar e abrir treinamento</button>
+<small>Não afeta os treinamentos de Partida, Emergência ou Liberação.</small>
+</main>
+<script>
+const APP_PATH='/training-operacao-normal-pratica-CIC/';
+const CACHE_PREFIX='training-operacao-normal-cic-';
+const statusEl=document.getElementById('status');
+
+document.getElementById('go').onclick=async()=>{
+  const btn=document.getElementById('go');
+  btn.disabled=true;
+  statusEl.textContent='Removendo cache antigo...';
+
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      const own=regs.filter(r=>r.scope && r.scope.includes(APP_PATH));
+      await Promise.all(own.map(r=>r.unregister()));
+    }
+
+    if('caches' in window){
+      const keys=await caches.keys();
+      await Promise.all(
+        keys.filter(k=>k.startsWith(CACHE_PREFIX)).map(k=>caches.delete(k))
+      );
+    }
+
+    statusEl.textContent='Recuperação concluída. Abrindo versão limpa...';
+    setTimeout(()=>{
+      location.replace(APP_PATH+'?recovery='+Date.now());
+    },500);
+  }catch(err){
+    console.error(err);
+    statusEl.textContent='Não foi possível limpar automaticamente. Abra as configurações do Chrome e limpe os dados do site robexter.github.io.';
+    btn.disabled=false;
+  }
+};
+</script>
+</body>
+</html>
