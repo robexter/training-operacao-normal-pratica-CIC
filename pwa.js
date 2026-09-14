@@ -8,48 +8,38 @@
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true;
 
-  const getButton = () => document.getElementById('installBtn');
+  function getButton() {
+    return document.getElementById('installBtn');
+  }
 
   function refresh() {
     const b = getButton();
     if (!b) return;
 
-    if (isStandalone()) {
-      b.textContent = 'App instalado';
-      b.disabled = true;
-      b.classList.remove('hidden');
-      return;
-    }
+    const installed = isStandalone();
+    const wantedText = installed ? 'App instalado' : 'Instalar App';
 
-    b.disabled = false;
-    b.classList.remove('hidden');
-    b.textContent = installEvent ? 'Instalar App' : 'Instalar App';
+    // Só altera o DOM quando houver mudança real.
+    // Isso evita o loop que travava a página no celular.
+    if (b.textContent !== wantedText) b.textContent = wantedText;
+    if (b.disabled !== installed) b.disabled = installed;
+    if (b.classList.contains('hidden')) b.classList.remove('hidden');
   }
 
-  function showFallback() {
+  function fallback() {
     const ua = navigator.userAgent || '';
-    const isIOS = /iPad|iPhone|iPod/.test(ua);
-    const isAndroid = /Android/i.test(ua);
 
-    if (isIOS) {
-      alert('No iPhone/iPad, a instalação não é aberta por este botão. Use Compartilhar → Adicionar à Tela de Início.');
+    if (/iPad|iPhone|iPod/.test(ua)) {
+      alert('No iPhone/iPad: toque em Compartilhar e escolha Adicionar à Tela de Início.');
       return;
     }
 
-    if (isAndroid) {
-      alert('O navegador ainda não liberou o prompt automático. No Chrome, toque em ⋮ → Instalar app. Se aparecer “Adicionar à tela inicial”, use essa opção. Abra esta página diretamente no Chrome, não dentro do navegador interno do WhatsApp/ChatGPT/Facebook.');
+    if (/Android/i.test(ua)) {
+      alert('Se a janela de instalação não aparecer, abra esta página diretamente no Chrome e use ⋮ → Instalar app ou Adicionar à tela inicial.');
       return;
     }
 
-    alert('O navegador ainda não liberou o prompt automático. Use o menu do navegador e escolha Instalar app / Adicionar à tela inicial.');
-  }
-
-  async function waitForInstallEvent(ms = 2500) {
-    const started = Date.now();
-    while (!installEvent && Date.now() - started < ms) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    return installEvent;
+    alert('Use o menu do navegador e escolha Instalar app ou Adicionar à tela inicial.');
   }
 
   async function install() {
@@ -58,55 +48,32 @@
       return;
     }
 
-    // Garante que o Service Worker esteja ativo antes de desistir do prompt.
-    try {
-      if ('serviceWorker' in navigator) {
-        if (!swRegistration) {
-          swRegistration = await navigator.serviceWorker.register('./sw.js', {scope: './'});
-        }
-        await navigator.serviceWorker.ready;
-      }
-    } catch (e) {
-      console.error('Falha ao preparar Service Worker:', e);
-    }
-
-    if (!installEvent) await waitForInstallEvent();
-
-    if (!installEvent) {
-      showFallback();
-      return;
-    }
-
-    const ev = installEvent;
-    installEvent = null;
-
-    try {
-      const result = await ev.prompt();
-      const choice = result || await ev.userChoice;
-      if (choice && choice.outcome === 'accepted') {
+    if (installEvent) {
+      const ev = installEvent;
+      installEvent = null;
+      try {
+        await ev.prompt();
+        await ev.userChoice;
         refresh();
-      } else {
-        refresh();
+        return;
+      } catch (err) {
+        console.error('Falha no prompt de instalação:', err);
       }
-    } catch (e) {
-      console.error('Falha ao abrir prompt de instalação:', e);
-      showFallback();
     }
+
+    fallback();
   }
 
   async function update() {
     try {
       if ('serviceWorker' in navigator) {
-        swRegistration = swRegistration || await navigator.serviceWorker.getRegistration('./');
-        if (swRegistration) await swRegistration.update();
+        const reg = await navigator.serviceWorker.getRegistration('./');
+        if (reg) await reg.update();
       }
-      // Força nova consulta dos arquivos sem alterar progresso/localStorage.
-      const url = new URL(location.href);
-      url.searchParams.set('_pwa', Date.now().toString());
-      location.replace(url.toString());
-    } catch (e) {
-      location.reload();
+    } catch (err) {
+      console.error('Falha ao atualizar SW:', err);
     }
+    location.reload();
   }
 
   window.addEventListener('beforeinstallprompt', event => {
@@ -120,22 +87,24 @@
     refresh();
   });
 
-  // Mantém o botão sincronizado mesmo quando o app.js recria o topo da página.
-  new MutationObserver(refresh).observe(document.documentElement, {
-    childList: true,
-    subtree: true
-  });
-
-  window.PWAInstall = {install, update, refresh};
+  window.PWAInstall = { install, update, refresh };
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js', {scope: './'})
-      .then(reg => {
-        swRegistration = reg;
-        return reg.update();
-      })
-      .catch(err => console.error('Service Worker:', err));
+    window.addEventListener('load', async () => {
+      try {
+        swRegistration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+        await swRegistration.update();
+      } catch (err) {
+        console.error('Service Worker:', err);
+      }
+      refresh();
+    });
   }
 
-  document.addEventListener('DOMContentLoaded', refresh);
+  document.addEventListener('DOMContentLoaded', () => {
+    refresh();
+    // O app.js cria o cabeçalho durante o carregamento.
+    // Esta segunda chamada única cobre aparelhos mais lentos sem observar/mutar o DOM em loop.
+    setTimeout(refresh, 600);
+  });
 })();

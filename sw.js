@@ -1,4 +1,4 @@
-const CACHE = 'training-operacao-normal-cic-v3.1.3-final-pwa';
+const CACHE = 'training-operacao-normal-cic-v3.1.4-mobile-open-fix';
 
 const ASSETS = [
   './index.html',
@@ -34,19 +34,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE).then(cache => cache.put('./index.html', copy));
-          return response;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-
+  // Navegação e arquivos do app: rede primeiro, cache como contingência.
   event.respondWith(
     fetch(event.request)
       .then(response => {
@@ -56,6 +44,11 @@ self.addEventListener('fetch', event => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(async () => {
+        const cached = await caches.match(event.request);
+        if (cached) return cached;
+        if (event.request.mode === 'navigate') return caches.match('./index.html');
+        throw new Error('offline');
+      })
   );
 });

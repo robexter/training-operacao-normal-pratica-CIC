@@ -1,22 +1,15 @@
-CORREÇÃO PWA V3.1.3
-====================
+HOTFIX V3.1.4 — LINK TRAVANDO NO CELULAR
 
-No repositório training-operacao-normal-pratica-CIC:
+Substitua SOMENTE estes dois arquivos na raiz do GitHub:
+1. pwa.js
+2. sw.js
 
-SUBSTITUIR:
-- app.js
-- index.html
-- sw.js
-- icon-192.png
-- icon-512.png
+Causa corrigida:
+O pwa.js V3.1.3 observava todas as alterações do DOM e, dentro do próprio observador,
+alterava novamente o botão "Instalar App". Em celular isso podia gerar um ciclo contínuo
+de alterações e travar a abertura da página.
 
-ADICIONAR:
-- pwa.js
-- manifest.json
+Depois do upload, use o endereço normal:
+https://robexter.github.io/training-operacao-normal-pratica-CIC/
 
-O antigo manifest.webmanifest pode permanecer no repositório, pois o index.html novo passa a usar manifest.json.
-
-Importante:
-- carregar todos estes arquivos juntos no mesmo commit/upload;
-- os ícones ficam na raiz do repositório;
-- abrir o site diretamente no Chrome Android para testar o botão de instalação.
+Não use o endereço com ?app=... para o primeiro teste.
