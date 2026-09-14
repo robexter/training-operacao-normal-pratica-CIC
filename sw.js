@@ -1,12 +1,12 @@
-const CACHE = 'training-operacao-normal-cic-v3.1.2-pwa-path-fix';
+const CACHE = 'training-operacao-normal-cic-v3.1.3-final-pwa';
 
 const ASSETS = [
-  './',
   './index.html',
   './styles.css',
   './app.js',
+  './pwa.js',
   './sala-cic.js',
-  './manifest.webmanifest',
+  './manifest.json',
   './icon-192.png',
   './icon-512.png'
 ];
@@ -22,7 +22,11 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key.startsWith('training-operacao-normal-cic-') && key !== CACHE)
+          .map(key => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
@@ -44,18 +48,14 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      const network = fetch(event.request)
-        .then(response => {
-          if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE).then(cache => cache.put(event.request, copy));
-          }
-          return response;
-        })
-        .catch(() => cached);
-
-      return cached || network;
-    })
+    fetch(event.request)
+      .then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE).then(cache => cache.put(event.request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

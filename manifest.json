@@ -1,0 +1,28 @@
+{
+  "name": "training operacao normal pratica CIC",
+  "short_name": "Operação Normal CIC",
+  "id": "./?app=training-operacao-normal-pratica-cic-v313",
+  "start_url": "./?app=training-operacao-normal-pratica-cic-v313",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "theme_color": "#07111f",
+  "background_color": "#07111f",
+  "description": "Treinamento operacional prático CIC da U-39 para operação normal e manobras com a unidade operando.",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
