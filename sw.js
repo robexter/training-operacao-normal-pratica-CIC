@@ -1,4 +1,4 @@
-const CACHE = 'training-operacao-normal-cic-v3.0.0';
+const CACHE = 'training-operacao-normal-cic-v3.1.1-install-hotfix';
 const ASSETS = [
   './','./index.html','./styles.css','./app.js','./manifest.webmanifest',
   './icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'

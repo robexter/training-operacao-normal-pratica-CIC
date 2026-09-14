@@ -3,7 +3,7 @@
 const APP_NAME = 'training operacao normal pratica CIC';
 const STORAGE_KEY = 'training-operacao-normal-pratica-cic-v3';
 const LEGACY_STORAGE_KEYS = ['training-operacao-normal-pratica-cic-v2'];
-const APP_VERSION = 'V3.0 · refinamento CIC';
+const APP_VERSION = 'V3.1.1 · Sala CIC + instalação PWA';
 
 const DIM_LABELS = { safety:'Segurança', stability:'Estabilidade', procedure:'Procedimento', coordination:'Coordenação' };
 
@@ -729,7 +729,7 @@ function coachingFor(dim){return ({
   coordination:'Reforce o handshake CIC-campo: solicitar, confirmar, observar a resposta e só então liberar a etapa seguinte.'
 })[dim]||'';}
 
-function topbar(){ return `<div class="topbar"><div class="brand"><img src="icons/icon-192.png" alt=""><div><h1>${APP_NAME}</h1><small>U-39 · Training Scenario Engine · foco operador CIC · ${APP_VERSION}</small></div></div><div class="actions"><button id="installBtn" class="btn primary hidden">Instalar App</button><button id="updateBtn" class="btn ghost">Atualizar app</button></div></div>`; }
+function topbar(){ return `<div class="topbar"><div class="brand"><img src="icons/icon-192.png" alt=""><div><h1>${APP_NAME}</h1><small>U-39 · Training Scenario Engine · foco operador CIC · ${APP_VERSION}</small></div></div><div class="actions"><button id="installBtn" class="btn primary">Instalar App</button><button id="updateBtn" class="btn ghost">Atualizar app</button></div></div>`; }
 function footer(){return `<div class="footer-note">Treinamento complementar baseado nos padrões fornecidos. Para execução real, prevalecem o procedimento vigente, a condição da unidade e as autorizações operacionais aplicáveis.</div>`}
 
 function home(){
@@ -809,7 +809,7 @@ function finishScenario(){
  bindCommon(); document.querySelector('#retry').onclick=()=>startScenario(s.id);document.querySelector('#goHome').onclick=home;
 }
 
-function bindCommon(){ const ib=document.querySelector('#installBtn'), ub=document.querySelector('#updateBtn'); if(deferredPrompt&&ib)ib.classList.remove('hidden'); if(ib)ib.onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;ib.classList.add('hidden');}; if(ub)ub.onclick=async()=>{if('serviceWorker'in navigator){const r=await navigator.serviceWorker.getRegistration();if(r){await r.update();alert('Verificação de atualização concluída. Se houver nova versão, feche e reabra o app.');}else alert('Service worker ainda não ativo. Abra novamente a página após a publicação.');}}; }
+function bindCommon(){ const ib=document.querySelector('#installBtn'), ub=document.querySelector('#updateBtn'); const installed=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true; if(ib){ if(installed){ib.textContent='App instalado';ib.disabled=true;} else {ib.classList.remove('hidden');ib.disabled=false;ib.textContent='Instalar App';} ib.onclick=async()=>{if(installed)return;if(deferredPrompt){deferredPrompt.prompt();const choice=await deferredPrompt.userChoice;if(choice&&choice.outcome==='accepted'){deferredPrompt=null;ib.textContent='App instalado';ib.disabled=true;}return;}alert('Se a janela de instalação não abrir, use o menu do navegador (⋮) e escolha “Instalar app” ou “Adicionar à tela inicial”. No Chrome/Android, aguarde alguns segundos após recarregar a página para o navegador validar o PWA.');}; } if(ub)ub.onclick=async()=>{if('serviceWorker'in navigator){const r=await navigator.serviceWorker.getRegistration();if(r){await r.update();alert('Verificação de atualização concluída. Se houver nova versão, feche e reabra o app.');}else alert('Service worker ainda não ativo. Abra novamente a página após a publicação.');}}; }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.querySelector('#installBtn');if(b)b.classList.remove('hidden');});
 window.addEventListener('appinstalled',()=>{deferredPrompt=null;const b=document.querySelector('#installBtn');if(b)b.classList.add('hidden');});
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.error));
